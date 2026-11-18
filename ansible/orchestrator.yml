@@ -1,0 +1,10 @@
+---
+- name: The Main Orchestrator
+  hosts: all
+  gather_facts: false
+  vars:
+    host_key_checking: false
+  roles:
+    - gatherfacts
+    - config
+    - backup
