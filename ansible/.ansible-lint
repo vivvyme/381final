@@ -1,0 +1,41 @@
+---
+# Profile sets the baseline strictness: min, basic, moderate, safety, shared, production
+profile: moderate
+
+# Paths to ignore completely
+exclude_paths:
+  - .cache/
+  - .github/
+  - .git/
+  - .venv/
+  - .gitignore 
+  - venv/
+  - molecule/
+  - roles/external/
+
+# Rules to downgrade to warnings instead of failing the lint run
+warn_list:
+  - experimental
+  - name[template]
+  - yaml[line-length]
+
+# Rules to completely skip
+skip_list: []
+  # - fqcn[action-core]
+  # - no-changed-when
+
+# Enable specific opt-in rules
+enable_list:
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+
+# Extra variables for Jinja2 template rendering checks
+extra_vars: {}
+
+# Offline mode (set to true in air-gapped CI environments)
+offline: false
+
+# Automatic fixes applied when running `ansible-lint --fix`
+write_list:
+  - all
