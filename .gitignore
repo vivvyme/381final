@@ -1,1 +1,3 @@
 .vaultpass
+ansible/collections/ansible_collections/
+ansible/collections/*.info

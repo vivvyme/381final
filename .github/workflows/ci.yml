@@ -1,0 +1,77 @@
+---
+name: Ansible CI
+
+on:
+  push:
+    branches: [main, ansible]
+    paths: ['ansible/**', '.github/workflows/ci.yml']
+  pull_request:
+    branches: [main]
+    paths: ['ansible/**', '.github/workflows/ci.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ansible
+
+env:
+  PY_COLORS: '1'
+  ANSIBLE_FORCE_COLOR: '1'
+
+jobs:
+  yamllint:
+    name: 1 - yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ansible/requirements/requirements.txt
+      - run: pip install -r requirements/requirements.txt
+      - run: yamllint --strict -c .yamllint .
+
+  ansible-lint:
+    name: 2 - ansible-lint
+    needs: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ansible/requirements/requirements.txt
+      - run: pip install -r requirements/requirements.txt
+      - run: ansible-galaxy collection install -r collections/requirements.yml -p collections
+      - run: ansible-lint orchestrator.yml
+
+  syntax-check:
+    name: 3 - syntax-check
+    needs: ansible-lint
+    runs-on: ubuntu-latest
+    env:
+      VAULT_PASSWORD: ${{ secrets.VAULT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ansible/requirements/requirements.txt
+      - run: pip install -r requirements/requirements.txt
+      - run: ansible-galaxy collection install -r collections/requirements.yml -p collections
+      - name: Prepare vault password
+        run: |
+          umask 077
+          printf '%s' "$VAULT_PASSWORD" > "$RUNNER_TEMP/vaultpass"
+          echo "ANSIBLE_VAULT_PASSWORD_FILE=$RUNNER_TEMP/vaultpass" >> "$GITHUB_ENV"
+      - run: ansible-playbook orchestrator.yml --syntax-check -i inventory/inventory.yml
