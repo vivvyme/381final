@@ -26,8 +26,16 @@ runs:
       working-directory: ansible
       run: pip install -r requirements/requirements.txt
 
-    - name: Install Galaxy collections
+    - name: Cache Galaxy collections
+      id: galaxy-cache
       if: inputs.galaxy == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ansible/collections/ansible_collections
+        key: galaxy-${{ runner.os }}-${{ hashFiles('ansible/collections/requirements.yml') }}
+
+    - name: Install Galaxy collections
+      if: inputs.galaxy == 'true' && steps.galaxy-cache.outputs.cache-hit != 'true'
       shell: bash
       working-directory: ansible
       run: ansible-galaxy collection install -r collections/requirements.yml -p collections
