@@ -1,0 +1,62 @@
+---
+name: Ansible CI
+
+on:
+  push:
+    branches: [main, ansible]
+    paths: ['ansible/**', '.github/workflows/ci.yml', '.github/actions/**']
+  pull_request:
+    branches: [main]
+    paths: ['ansible/**', '.github/workflows/ci.yml', '.github/actions/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ansible
+
+env:
+  PY_COLORS: '1'
+  ANSIBLE_FORCE_COLOR: '1'
+
+jobs:
+  yamllint:
+    name: 1 - yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_runners
+        with:
+          galaxy: 'false'
+      - run: yamllint --strict -c .yamllint .
+
+  ansible-lint:
+    name: 2 - ansible-lint
+    needs: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_runners
+      - run: ansible-lint orchestrator.yml
+
+  syntax-check:
+    name: 3 - syntax-check
+    needs: ansible-lint
+    runs-on: ubuntu-latest
+    env:
+      VAULT_PASSWORD: ${{ secrets.VAULT_PASS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_runners
+      - name: Prepare vault password
+        run: |
+          umask 077
+          printf '%s' "$VAULT_PASSWORD" > "$RUNNER_TEMP/vaultpass"
+          echo "ANSIBLE_VAULT_PASSWORD_FILE=$RUNNER_TEMP/vaultpass" >> "$GITHUB_ENV"
+      - run: ansible-playbook orchestrator.yml --syntax-check -i inventory/inventory.yml

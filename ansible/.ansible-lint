@@ -4,14 +4,14 @@ profile: moderate
 
 # Paths to ignore completely
 exclude_paths:
-  - .cache/
-  - .github/
-  - .git/
-  - .venv/
-  - .gitignore 
+  - .gitignore
   - venv/
   - molecule/
   - roles/external/
+  - collections/
+  - group_vars/all.yml
+  - .vaultpass
+  - inventory/
 
 # Rules to downgrade to warnings instead of failing the lint run
 warn_list:
