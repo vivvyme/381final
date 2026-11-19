@@ -1,0 +1,34 @@
+---
+- name: State OS Detected
+  ansible.builtin.debug:
+    msg: "Detected OS: {{ ansible_network_os }}"
+
+# All of this is from my template (will need to be changed ofc
+
+# - name: Gather all device package information
+#   ciena.saos10.saos10_command:
+#     commands: "{{ item.cmd }}"
+#   async: 60
+#   poll: 0
+#   loop:
+#     - { name: 'software', cmd: 'software show' }
+#   loop_control:
+#     label: "{{ item.name }}"
+#   register: gatherfacts_async_checks
+#   vars:
+#     ansible_command_timeout: 120
+
+# - name: Wait for all checks to complete
+#   ansible.builtin.async_status:
+#     jid: "{{ item.ansible_job_id }}"
+#   loop: "{{ gatherfacts_async_checks.results }}"
+#   loop_control:
+#     label: "{{ item.item.name }}"
+#   register: gatherfacts_check_results
+#   until: gatherfacts_check_results.finished
+#   retries: 30
+#   delay: 2
+
+# - name: Extract command outputs
+#   ansible.builtin.set_fact:
+#     ciena_gatherfacts_current_software: "{{ ciena_gatherfacts_check_results.results[0] }}"
