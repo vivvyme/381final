@@ -9,7 +9,7 @@ exclude_paths:
   - molecule/
   - roles/external/
   - collections/
-  - group_vars/all.yml
+  - group_vars/
   - .vaultpass
   - inventory/
 
