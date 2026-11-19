@@ -16,5 +16,7 @@ Stages:
 3. **syntax-check** (`orchestrator.yml`)
 
 `.github/actions/setup_runners` - Python, pip, Galaxy collections with caching
+
 `ansible/requirements/requirements.txt` - Python Deps
+
 `ansible/collections/requirements.yml` - Ansible Collections
