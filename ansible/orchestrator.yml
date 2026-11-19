@@ -1,9 +1,11 @@
 ---
 - name: The Main Orchestrator
   hosts: all
+  strategy: linear
   gather_facts: false
   vars:
-    host_key_checking: false
+    ansible_network_os: cisco.ios
+    ansible_connection: ansible.netcommon.net_cli
   roles:
     - gatherfacts
     - config
