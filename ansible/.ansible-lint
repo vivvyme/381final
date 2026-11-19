@@ -11,6 +11,7 @@ exclude_paths:
   - collections/
   - group_vars/all.yml
   - .vaultpass
+  - inventory/
 
 # Rules to downgrade to warnings instead of failing the lint run
 warn_list:
