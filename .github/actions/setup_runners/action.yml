@@ -1,0 +1,33 @@
+---
+name: Setup runners
+description: Install Python, the pip requirements and (optionally) the Galaxy collections
+
+inputs:
+  python-version:
+    description: Python version to install
+    required: false
+    default: '3.12'
+  galaxy:
+    description: Install the Galaxy collections from collections/requirements.yml
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: ansible/requirements/requirements.txt
+
+    - name: Install Python requirements
+      shell: bash
+      working-directory: ansible
+      run: pip install -r requirements/requirements.txt
+
+    - name: Install Galaxy collections
+      if: inputs.galaxy == 'true'
+      shell: bash
+      working-directory: ansible
+      run: ansible-galaxy collection install -r collections/requirements.yml -p collections
