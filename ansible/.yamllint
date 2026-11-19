@@ -2,7 +2,7 @@
 extends: default
 
 ignore: |
-  group_vars/all.yml
+  group_vars/
   .cache/
   .venv/
   venv/
